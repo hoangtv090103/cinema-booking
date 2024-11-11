@@ -22,8 +22,17 @@ func AuthMiddleware(userRepo authinterface.IUserRepository) fiber.Handler {
 		}
 
 		claims := token.Claims.(jwt.MapClaims)
-		userID := uint(claims["user_id"].(float64))
-		roleID := uint(claims["role_id"].(float64))
+		userIDFloat, ok := claims["user_id"].(float64)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user ID"})
+		}
+		userID := uint(userIDFloat)
+
+		roleIDFloat, ok := claims["role_id"].(float64)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid role ID"})
+		}
+		roleID := uint(roleIDFloat)
 
 		user, err := userRepo.GetByID(c.Context(), userID)
 		if err != nil {

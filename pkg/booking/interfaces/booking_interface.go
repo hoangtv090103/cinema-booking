@@ -6,7 +6,7 @@ import (
 )
 
 type IBookingRepository interface {
-	GetBookingByID(ctx context.Context, id uint) (*bookingdomain.Booking, error)
-	ListBookingsByUser(ctx context.Context, userID uint) ([]*bookingdomain.Booking, error)
-	CreateBooking(ctx context.Context, booking *bookingdomain.Booking) error
+	CreateBooking(ctx context.Context, booking *bookingdomain.BookingCreate) error
+	GetUserBookings(ctx context.Context, userID uint) ([]*bookingdomain.Booking, error)
+	ConfirmBooking(ctx context.Context, bookingID uint) error
 }

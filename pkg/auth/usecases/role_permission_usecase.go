@@ -24,7 +24,7 @@ func NewRolePermissionUseCase(
 	permissionRepo authinterface.IPermissionRepository,
 	userRoleRepo authinterface.IUserRoleRepository,
 	rolePermissionRepo IRolePermissionUseCase,
-) *RolePermissionUseCase {
+) IRolePermissionUseCase {
 	return &RolePermissionUseCase{
 		roleRepo:           roleRepo,
 		permissionRepo:     permissionRepo,

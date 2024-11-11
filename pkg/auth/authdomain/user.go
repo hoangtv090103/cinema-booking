@@ -17,7 +17,7 @@ type User struct {
 type UserCreate struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
-	RoleID   uint   `json:"role_id"`
+	RoleID   uint   `json:"-"`
 	Password string `json:"password"`
 }
 
@@ -32,4 +32,5 @@ type UserUpdate struct {
 type UserLogin struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	RoleID   uint   `json:"role_id"`
 }
