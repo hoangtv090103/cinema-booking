@@ -1,12 +1,12 @@
-package movieinterface
+package theaterinterface
 
 import (
-	theaterdomain "bookingcinema/pkg/movie/domain"
+	theaterdomain "bookingcinema/pkg/theater/theaterdomain"
 	"context"
 )
 
 type IScreenRepository interface {
-	GetScreenByID(ctx context.Context, id uint) (*theaterdomain.Screen, error)
-	ListScreensByTheater(ctx context.Context, theaterID uint) ([]*theaterdomain.Screen, error)
-	CreateScreen(ctx context.Context, screen *theaterdomain.Screen) error
+	GetByID(ctx context.Context, screenID uint) (*theaterdomain.Screen, error)
+	GetByTheater(ctx context.Context, theaterID uint) ([]*theaterdomain.Screen, error)
+	Create(ctx context.Context, screen *theaterdomain.ScreenCreate) error
 }

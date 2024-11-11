@@ -1,12 +1,12 @@
-package movieinterface
+package theaterinterface
 
 import (
-	theaterdomain "bookingcinema/pkg/movie/domain"
+	theaterdomain "bookingcinema/pkg/theater/theaterdomain"
 	"context"
 )
 
 type ISeatRepository interface {
-	GetSeatByID(ctx context.Context, id uint) (*theaterdomain.Seat, error)
-	ListSeatsByScreen(ctx context.Context, screenID uint) ([]*theaterdomain.Seat, error)
-	CreateSeat(ctx context.Context, seat *theaterdomain.Seat) error
+	GetByID(ctx context.Context, id uint) (*theaterdomain.Seat, error)
+	GetByScreen(ctx context.Context, screenID uint) ([]*theaterdomain.Seat, error)
+	Create(ctx context.Context, seat *theaterdomain.SeatCreate) error
 }

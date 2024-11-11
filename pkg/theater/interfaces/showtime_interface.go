@@ -1,12 +1,12 @@
-package bookinginterface
+package theaterinterface
 
 import (
-	bookingdomain "bookingcinema/pkg/booking/domain"
+	bookingdomain "bookingcinema/pkg/theater/theaterdomain"
 	"context"
 )
 
 type IShowtimeRepository interface {
-	GetShowtimeByID(ctx context.Context, id uint) (*bookingdomain.Showtime, error)
-	ListShowtimesByMovie(ctx context.Context, movieID uint) ([]*bookingdomain.Showtime, error)
-	CreateShowtime(ctx context.Context, showtime *bookingdomain.Showtime) error
+	GetByID(ctx context.Context, id uint) (*bookingdomain.Showtime, error)
+	GetByMovie(ctx context.Context, movieID uint) ([]*bookingdomain.Showtime, error)
+	Create(ctx context.Context, showtime *bookingdomain.Showtime) error
 }

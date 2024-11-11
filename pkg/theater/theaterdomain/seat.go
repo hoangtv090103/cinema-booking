@@ -1,4 +1,4 @@
-package moviedomain
+package theaterdomain
 
 import "time"
 
@@ -14,4 +14,12 @@ type Seat struct {
 	Active    bool      `json:"active"`
 	// Ensure seat numbers are unique within a screen
 
+}
+
+type SeatCreate struct {
+	ScreenID  uint   `json:"screen_id"`
+	Row       string `json:"row"`
+	Number    uint   `json:"seat_number"`
+	Available bool   `json:"available"`
+	SeatType  string `json:"seat_type"`
 }

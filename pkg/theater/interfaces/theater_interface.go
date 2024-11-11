@@ -1,14 +1,16 @@
-package movieinterface
+package theaterinterface
 
 import (
-	bookingdomain "bookingcinema/pkg/booking/domain"
-	theaterdomain "bookingcinema/pkg/movie/domain"
+	moviedomain "bookingcinema/pkg/theater/theaterdomain"
 	"context"
 )
 
+// ITheaterRepository TheaterRepository defines methods for theater data access.
 type ITheaterRepository interface {
-	ListTheaters(ctx context.Context) ([]theaterdomain.Theater, error)
-	GetScreens(ctx context.Context, theaterID uint) ([]theaterdomain.Screen, error)
-	AddShowtime(ctx context.Context, showtime *bookingdomain.Showtime) error
-	GetShowtimes(ctx context.Context, movieID uint, date string) ([]*bookingdomain.Showtime, error)
+	GetByID(ctx context.Context, id uint) (*moviedomain.Theater, error)
+	GetByName(ctx context.Context, name string) ([]*moviedomain.Theater, error)
+	GetAll(ctx context.Context) ([]*moviedomain.Theater, error)
+	Create(ctx context.Context, theater *moviedomain.Theater) error
+	Update(ctx context.Context, theater *moviedomain.Theater) error
+	Delete(ctx context.Context, id uint) error
 }
