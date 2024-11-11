@@ -1,7 +1,7 @@
-package theaterinterface
+package movieinterface
 
 import (
-	theaterdomain "bookingcinema/pkg/theater/domain"
+	theaterdomain "bookingcinema/pkg/movie/domain"
 	"context"
 )
 

@@ -1,12 +1,14 @@
-package theaterinterface
+package movieinterface
 
 import (
-	theaterdomain "bookingcinema/pkg/theater/domain"
+	bookingdomain "bookingcinema/pkg/booking/domain"
+	theaterdomain "bookingcinema/pkg/movie/domain"
 	"context"
 )
 
 type ITheaterRepository interface {
-	GetTheaterByID(ctx context.Context, id uint) (*theaterdomain.Theater, error)
-	ListTheaters(ctx context.Context) ([]*theaterdomain.Theater, error)
-	CreateTheater(ctx context.Context, theater *theaterdomain.Theater) ([]*theaterdomain.Theater, error)
+	ListTheaters(ctx context.Context) ([]theaterdomain.Theater, error)
+	GetScreens(ctx context.Context, theaterID uint) ([]theaterdomain.Screen, error)
+	AddShowtime(ctx context.Context, showtime *bookingdomain.Showtime) error
+	GetShowtimes(ctx context.Context, movieID uint, date string) ([]*bookingdomain.Showtime, error)
 }

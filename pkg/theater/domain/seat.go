@@ -1,4 +1,4 @@
-package theaterdomain
+package moviedomain
 
 import "time"
 
@@ -7,6 +7,7 @@ type Seat struct {
 	ScreenID  uint      `json:"screen_id"`
 	Row       string    `json:"row"`
 	Number    uint      `json:"seat_number"`
+	Available bool      `json:"available"`
 	SeatType  string    `json:"seat_type"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

@@ -1,4 +1,4 @@
-package theaterdomain
+package moviedomain
 
 import "time"
 
