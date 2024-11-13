@@ -2,6 +2,7 @@ package bookingusecases
 
 import (
 	bookingdomain "bookingcinema/pkg/booking/domain"
+	bookingkafka "bookingcinema/pkg/booking/infrastructure/kafka"
 	bookinginterface "bookingcinema/pkg/booking/interfaces"
 	theaterinterface "bookingcinema/pkg/theater/interfaces"
 	"context"
@@ -18,6 +19,7 @@ type BookingUseCase struct {
 	pricingRepo  bookinginterface.ITicketPricingRepository
 	showtimeRepo theaterinterface.IShowtimeRepository
 	seatRepo     theaterinterface.ISeatRepository
+	producer     *bookingkafka.Producer
 }
 
 func NewBookingUseCase(
@@ -25,16 +27,19 @@ func NewBookingUseCase(
 	pricingRepo bookinginterface.ITicketPricingRepository,
 	showtimeRepo theaterinterface.IShowtimeRepository,
 	seatRepo theaterinterface.ISeatRepository,
+	producer *bookingkafka.Producer,
 ) IBookingUseCase {
 	return &BookingUseCase{
 		bookingRepo:  bookingRepo,
 		pricingRepo:  pricingRepo,
 		showtimeRepo: showtimeRepo,
 		seatRepo:     seatRepo,
+		producer:     producer,
 	}
 }
 
 func (u *BookingUseCase) CreateBooking(ctx context.Context, userID uint, showtimeID uint, seatIDs []uint) (*bookingdomain.Booking, error) {
+	var booking *bookingdomain.Booking
 	// 1. Verify showtime exists and is valid
 	showtime, err := u.showtimeRepo.GetByID(ctx, showtimeID)
 	if err != nil {
@@ -59,7 +64,6 @@ func (u *BookingUseCase) CreateBooking(ctx context.Context, userID uint, showtim
 		return nil, fmt.Errorf("failed to create booking: %v", err)
 	}
 
-	// 4. Get user's bookings
 	bookings, err := u.bookingRepo.GetUserBookings(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user bookings: %v", err)
@@ -67,7 +71,14 @@ func (u *BookingUseCase) CreateBooking(ctx context.Context, userID uint, showtim
 
 	// Return the latest booking
 	if len(bookings) > 0 {
-		return bookings[len(bookings)-1], nil
+		booking = bookings[len(bookings)-1]
+	}
+
+	// Publish booking event
+	err = u.producer.PublishBookingEvent(booking.ID, userID)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to publish booking event: %v", err)
 	}
 
 	return nil, fmt.Errorf("booking created but not found")

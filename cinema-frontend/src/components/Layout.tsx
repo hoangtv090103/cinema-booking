@@ -18,7 +18,7 @@ export default function Layout({ children }: LayoutProps) {
               <div className="ml-10 flex items-center space-x-4">
                 <Link href="/movies" className="text-gray-700 hover:text-gray-900">
                   Movies
-                </Link>
+              </Link>
                 <Link href="/theaters" className="text-gray-700 hover:text-gray-900">
                   Theaters
                 </Link>

@@ -10,6 +10,7 @@ import (
 type IMovieRepository interface {
 	GetByName(ctx context.Context, name string) ([]*moviedomain.Movie, error)
 	GetAll(ctx context.Context) ([]*moviedomain.Movie, error)
+	GetByID(ctx context.Context, movieID uint) (*moviedomain.Movie, error)
 	Create(ctx context.Context, movie *moviedomain.Movie) error
 	Delete(ctx context.Context, movieID uint) error
 }

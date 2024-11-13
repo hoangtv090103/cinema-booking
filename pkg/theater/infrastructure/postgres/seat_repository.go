@@ -67,6 +67,36 @@ func (r *SeatRepository) GetByScreen(ctx context.Context, screenID uint) ([]*the
 	return seats, nil
 }
 
+func (r *SeatRepository) GetByShowtime(ctx context.Context, showtimeID uint) ([]*theaterdomain.Seat, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT s.id, s.screen_id, s.row, s.number, s.available, s.created_at, s.updated_at, s.active
+		FROM seats s
+		JOIN showtimes sht ON s.screen_id = sht.screen_id
+		WHERE sht.id = $1 AND s.active = true
+	`, showtimeID)
+
+	if err != nil {
+		return nil, fmt.Errorf("cannot get seats for showtime %d: %v", showtimeID, err)
+	}
+
+	defer rows.Close()
+
+	var seats []*theaterdomain.Seat
+	for rows.Next() {
+		var seat theaterdomain.Seat
+		if err := rows.Scan(&seat.ID, &seat.ScreenID, &seat.Row, &seat.Number, &seat.Available, &seat.CreatedAt, &seat.UpdatedAt, &seat.Active); err != nil {
+			return nil, fmt.Errorf("cannot scan seat: %v", err)
+		}
+		seats = append(seats, &seat)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %v", err)
+	}
+
+	return seats, nil
+}
+
 func (r *SeatRepository) Create(ctx context.Context, seat *theaterdomain.SeatCreate) error {
 	query := "INSERT INTO seats (screen_id, row, number, created_at, updated_at, active) VALUES ($1, $2, $3, $4, $5, $6)"
 	_, err := r.db.ExecContext(ctx, query, seat.ScreenID, seat.Row, seat.Number)

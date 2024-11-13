@@ -20,3 +20,20 @@ export interface Showtime {
     startTime: string;
     active: boolean;
 }
+
+export interface Seat {
+    id: number;
+    row: string;
+    number: number;
+    isAvailable: boolean;
+    screenId: number;
+}
+
+export interface Booking {
+    id: number;
+    user_id: number;
+    showtime_id: number;
+    seat_ids: number[];
+    status: string;
+    created_at: string;
+}

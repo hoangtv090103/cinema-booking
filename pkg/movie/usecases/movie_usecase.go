@@ -9,6 +9,7 @@ import (
 type IMovieUseCase interface {
 	GetMoviesByName(ctx context.Context, name string) ([]*moviedomain.Movie, error)
 	GetAllMovies(ctx context.Context) ([]*moviedomain.Movie, error)
+	GetMovieByID(ctx context.Context, movieID uint) (*moviedomain.Movie, error)
 	CreateMovie(ctx context.Context, movie *moviedomain.Movie) error
 	DeleteMovie(ctx context.Context, movieID uint) error
 }
@@ -29,10 +30,14 @@ func (uc *MovieUseCase) GetAllMovies(ctx context.Context) ([]*moviedomain.Movie,
 	return uc.repo.GetAll(ctx)
 }
 
+func (uc *MovieUseCase) GetMovieByID(ctx context.Context, movieID uint) (*moviedomain.Movie, error) {
+	return uc.repo.GetByID(ctx, movieID)
+}
+
 func (uc *MovieUseCase) CreateMovie(ctx context.Context, movie *moviedomain.Movie) error {
 	return uc.repo.Create(ctx, movie)
 }
 
 func (uc *MovieUseCase) DeleteMovie(ctx context.Context, movieID uint) error {
 	return uc.repo.Delete(ctx, movieID)
-} 
+}

@@ -3,9 +3,10 @@ package theaterhandler
 import (
 	"bookingcinema/pkg/theater/theaterdomain"
 	theaterusecases "bookingcinema/pkg/theater/usecases"
-	"github.com/gofiber/fiber/v2"
 	"net/http"
 	"strconv"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type SeatHandler struct {
@@ -28,6 +29,18 @@ func (h *SeatHandler) GetSeatByID(c *fiber.Ctx) error {
 	return c.JSON(seat)
 }
 
+func (h *SeatHandler) GetSeatsByShowtime(c *fiber.Ctx) error {
+	showtimeID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid showtime ID"})
+	}
+
+	seats, err := h.useCase.GetSeatsByShowtime(c.Context(), uint(showtimeID))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(seats)
+}
 func (h *SeatHandler) GetSeatsByScreen(c *fiber.Ctx) error {
 	screenID, err := strconv.Atoi(c.Params("screen_id"))
 	if err != nil {

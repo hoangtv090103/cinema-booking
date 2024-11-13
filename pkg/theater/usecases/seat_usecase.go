@@ -8,6 +8,7 @@ import (
 
 type ISeatUseCase interface {
 	GetSeatByID(ctx context.Context, seatID uint) (*theaterdomain.Seat, error)
+	GetSeatsByShowtime(ctx context.Context, showtimeID uint) ([]*theaterdomain.Seat, error)
 	GetSeatsByScreen(ctx context.Context, screenID uint) ([]*theaterdomain.Seat, error)
 	CreateSeat(ctx context.Context, seat *theaterdomain.SeatCreate) error
 }
@@ -22,6 +23,10 @@ func NewSeatUseCase(repo theaterinterface.ISeatRepository) ISeatUseCase {
 
 func (uc *SeatUseCase) GetSeatByID(ctx context.Context, seatID uint) (*theaterdomain.Seat, error) {
 	return uc.repo.GetByID(ctx, seatID)
+}
+
+func (uc *SeatUseCase) GetSeatsByShowtime(ctx context.Context, showtimeID uint) ([]*theaterdomain.Seat, error) {
+	return uc.repo.GetByShowtime(ctx, showtimeID)
 }
 
 func (uc *SeatUseCase) GetSeatsByScreen(ctx context.Context, screenID uint) ([]*theaterdomain.Seat, error) {

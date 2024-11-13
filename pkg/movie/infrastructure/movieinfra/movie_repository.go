@@ -100,6 +100,36 @@ func (r *MovieRepository) GetByName(ctx context.Context, name string) ([]*movied
 	return movies, nil
 }
 
+func (r *MovieRepository) GetByID(ctx context.Context, movieID uint) (*moviedomain.Movie, error) {
+	var movie moviedomain.Movie
+
+	query := `
+		SELECT id, title, description, release_date, duration, created_at, updated_at, active
+		FROM movies
+		WHERE id = $1 AND active = true
+	`
+
+	err := r.db.QueryRowContext(ctx, query, movieID).Scan(
+		&movie.ID,
+		&movie.Title,
+		&movie.Description,
+		&movie.ReleaseDate,
+		&movie.Duration,
+		&movie.CreatedAt,
+		&movie.UpdatedAt,
+		&movie.Active,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("cannot get theater by id: %v", err)
+	}
+
+	return &movie, nil
+}
+
 func (r *MovieRepository) Create(ctx context.Context, movie *moviedomain.Movie) error {
 	query := `
 		INSERT INTO movies (title, description, release_date, duration)

@@ -27,6 +27,23 @@ func (h *MovieHandler) GetAllMovies(c *fiber.Ctx) error {
 	return c.JSON(movies)
 }
 
+func (h *MovieHandler) GetMovieByID(c *fiber.Ctx) error {
+	movieID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid movie ID",
+		})
+	}
+
+	movie, err := h.useCase.GetMovieByID(c.Context(), uint(movieID))
+	if err != nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"error": "Movie not found",
+		})
+	}
+	return c.JSON(movie)
+}
+
 func (h *MovieHandler) SearchMovies(c *fiber.Ctx) error {
 	name := c.Query("name")
 	if name == "" {

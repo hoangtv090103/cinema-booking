@@ -6,6 +6,7 @@ import (
 	authusecase "bookingcinema/pkg/auth/usecases"
 	authutils "bookingcinema/pkg/auth/utils"
 	dbpg "bookingcinema/pkg/database"
+	"context"
 
 	moviehandler "bookingcinema/pkg/movie/handlers"
 	"bookingcinema/pkg/movie/infrastructure/movieinfra"
@@ -16,6 +17,7 @@ import (
 	theaterusecase "bookingcinema/pkg/theater/usecases"
 
 	bookinghandler "bookingcinema/pkg/booking/handlers"
+	bookingkafka "bookingcinema/pkg/booking/infrastructure/kafka"
 	bookinginfra "bookingcinema/pkg/booking/infrastructure/postgres"
 	bookingUsecase "bookingcinema/pkg/booking/usecases"
 	"log"
@@ -42,7 +44,7 @@ func main() {
 
 	// Add CORS middleware
 	app.Use(func(c *fiber.Ctx) error {
-		c.Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Set("Access-Control-Allow-Origin", "*")
 		c.Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
 		c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
@@ -51,6 +53,13 @@ func main() {
 		}
 		return c.Next()
 	})
+
+	// Initialize Kafka Producer
+	producer := bookingkafka.NewProducer("kafka:9092") // Adjust the broker address as needed
+
+	// Initialize Kafka Consumer
+	consumer := bookingkafka.NewConsumer("kafka:9092") // Adjust the broker address as needed
+	go consumer.ReadMessages(context.Background())
 
 	// Repositories and Services
 	userRepo := authinfra.NewUserRepository(conn)
@@ -82,7 +91,7 @@ func main() {
 	pricingRepo := bookinginfra.NewTicketPricingRepository(conn)
 
 	bookingRepo := bookinginfra.NewBookingRepository(conn)
-	bookingUseCase := bookingUsecase.NewBookingUseCase(bookingRepo, pricingRepo, showtimeRepo, seatRepo)
+	bookingUseCase := bookingUsecase.NewBookingUseCase(bookingRepo, pricingRepo, showtimeRepo, seatRepo, producer)
 	bookingHandler := bookinghandler.NewBookingHandler(bookingUseCase)
 
 	api := app.Group("/api")
@@ -99,11 +108,25 @@ func main() {
 	v1.Get("/auth/user", authutils.AuthMiddleware(userRepo), authHandler.UserHandler)
 
 	// Movie Routes
-	movies := v1.Group("/movies")
-	movies.Get("/", movieHandler.GetAllMovies)
-	movies.Get("/search", movieHandler.SearchMovies)
-	movies.Post("/", authutils.AuthMiddleware(userRepo), movieHandler.CreateMovie)
-	movies.Delete("/:id", authutils.AuthMiddleware(userRepo), movieHandler.DeleteMovie)
+	movieRoute := v1.Group("/movies")
+	movieRoute.Get(":id", movieHandler.GetMovieByID)
+	movieRoute.Get("/", movieHandler.GetAllMovies)
+	movieRoute.Get("/search", movieHandler.SearchMovies)
+	movieRoute.Post("/", authutils.AuthMiddleware(userRepo), movieHandler.CreateMovie)
+	movieRoute.Delete("/:id", authutils.AuthMiddleware(userRepo), movieHandler.DeleteMovie)
+
+	// Showtimes
+	movieShowtimesRoute := movieRoute.Group("/:movie_id/showtimes")
+	movieShowtimesRoute.Get("/:id", showtimeHandler.GetShowtimeByID)
+	movieShowtimesRoute.Get("/", showtimeHandler.GetShowtimesByMovie)
+	movieShowtimesRoute.Get("/:id/seats", seatHandler.GetSeatsByShowtime)
+	movieShowtimesRoute.Post("/", authutils.AuthMiddleware(userRepo), showtimeHandler.CreateShowtime)
+
+	showtimesRoute := v1.Group("/showtimes")
+	showtimesRoute.Get("/:id", showtimeHandler.GetShowtimeByID)
+	showtimesRoute.Get("/:id/seats", seatHandler.GetSeatsByShowtime)
+	showtimesRoute.Get("/", showtimeHandler.GetShowtimesByMovie)
+	showtimesRoute.Post("/", authutils.AuthMiddleware(userRepo), showtimeHandler.CreateShowtime)
 
 	// Theater Routes
 	theaters := v1.Group("/theaters")
@@ -120,10 +143,6 @@ func main() {
 	seats := screens.Group("/:screen_id/seats")
 	seats.Get("/", seatHandler.GetSeatsByScreen)
 	seats.Post("/", authutils.AuthMiddleware(userRepo), seatHandler.CreateSeat)
-
-	showtimes := v1.Group("/showtimes")
-	showtimes.Get("/movie/:movie_id", showtimeHandler.GetShowtimesByMovie)
-	showtimes.Post("/", authutils.AuthMiddleware(userRepo), showtimeHandler.CreateShowtime)
 
 	// // Booking Routes
 	bookings := v1.Group("/bookings")

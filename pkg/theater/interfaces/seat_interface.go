@@ -7,6 +7,7 @@ import (
 
 type ISeatRepository interface {
 	GetByID(ctx context.Context, id uint) (*theaterdomain.Seat, error)
+	GetByShowtime(ctx context.Context, showtimeID uint) ([]*theaterdomain.Seat, error)
 	GetByScreen(ctx context.Context, screenID uint) ([]*theaterdomain.Seat, error)
 	Create(ctx context.Context, seat *theaterdomain.SeatCreate) error
 }

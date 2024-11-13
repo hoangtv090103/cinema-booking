@@ -103,14 +103,14 @@ func (r *BookingRepository) GetSeats(ctx context.Context, seatIDs []uint, tx *sq
 func (r *BookingRepository) CreateBookingSeats(ctx context.Context, seats []*moviedomain.Seat, bookingID uint, tx *sql.Tx) ([]*bookingdomain.BookingSeat, error) {
 	var bookingSeats []*bookingdomain.BookingSeat
 	query := `
-		INSERT INTO booking_seats (booking_id, seat_id) VALUES (?, ?) RETURNING id, booking_id, seat_id, price
+		INSERT INTO booking_seats (booking_id, seat_id, price) VALUES (?, ?, ?) RETURNING id, booking_id, seat_id, price
 	`
 	query = sqlx.Rebind(sqlx.DOLLAR, query)
 
 	for _, seat := range seats {
 		price, err := r.getSeatPrice(ctx, seat.SeatType, tx)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("cannot get seat price: %v", err)
 		}
 
 		var bookingSeat bookingdomain.BookingSeat
@@ -133,7 +133,7 @@ func (r *BookingRepository) getSeatPrice(ctx context.Context, seatType string, t
 	query = sqlx.Rebind(sqlx.DOLLAR, query)
 	var price float64
 	err := tx.QueryRowContext(ctx, query, seatType).Scan(&price)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return 0, fmt.Errorf("cannot get seat price: %v", err)
 	}
 	return price, nil
